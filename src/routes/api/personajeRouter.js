@@ -9,7 +9,7 @@ const imgUpload = require('../../middleware/middlewareStorageActor')
 router.get('/',checkAuth,characterAll);
 
 /* CREATE CHARACTER. */
-router.post('/',checkAuth,imgUpload.single('imagen'),validatorActors,createCharacter);
+router.post('/',imgUpload.single('imagen'),checkAuth,validatorActors,createCharacter);
 
 /* EDIT CHARACTER*/
 router.put('/:id',checkAuth,imgUpload.single('imagen'),validatorActors,updateCharacter);

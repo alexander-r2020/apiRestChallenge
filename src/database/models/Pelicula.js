@@ -24,6 +24,10 @@ module.exports = (sequelize,DataTypes) =>{
             allowNull: false,
             onDelete: "cascade"
         },
+        fecha_de_creacion: {
+            type: DataTypes.DATEONLY,
+            allowNull: false
+        },
         createdAt:{
             type: DataTypes.DATE
         },

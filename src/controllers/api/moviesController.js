@@ -1,5 +1,6 @@
 const db = require("../../database/models");
 const {validationResult} = require('express-validator')
+const { Op } = require("sequelize");
 
 const Movies=db.Pelicula
 const Genres = db.Genero
@@ -49,98 +50,89 @@ const controlador = {
         .catch(error=>console.log(error))
     }else if(req.query.order){
         const{order}=req.query
+        if(order.toLocaleUpperCase() === "ASC"){
+          Movies.findAll()
+          .then((movie)=>{
+            res.status(200)
+            res.json({
+              meta: {
+                status: 302,
+                total: movie.length,
+                url: `/characters?order=${order}`,
+              },
+              data: movie,
+            })
+          })
+          .catch(error=>console.log(error))
+        }else if(order.toLocaleUpperCase()==="DESC"){
         Movies.findAll({
-          where:{
-            titulo:{
-                [Op.substring]: `%${movies}%`
-            }
-        },
-          include:[{association:"Personajes"}]
+          order: [
+            ['fecha_de_creacion', 'DESC']
+        ]
+          
         })
         .then(movie=>{
             res.json({
             meta: {
               status: 302,
               total: movie.length,
-              url: `/characters?movies=${movies}`,
+              url: `/characters?order=${order}`,
             },
             data: movie,
           })
         })
         
         .catch(error=>console.log(error))
+      }else{
+        res.status(400)
+        res.json({
+          meta: {
+            status: 400,
+            msg: "not found order",
+          }
+          
+        })
+      }
         
     }else{
-        Actors.findAll()
-        .then((actor) => {
-        if(actor.length > 0){
-       
-        const data = actor.map((e) => {
-          return {
-            id: e.id,
-            imagen: e.imagen,
-            nombre: e.nombre,
-          };
-        });
+      Movies.findAll({
+        include:[{all:true}]
+    })
+    .then((movie) => {
+        
+    if(movie.length > 0){
+   
+    const data = movie.map((e) => {
+      return {
+        id: e.id,
+        imagen: e.imagen,
+        titulo: e.titulo,
+        tiempo_creado:e.createdAt
+      };
+    });
 
-        res.json({
-          meta: {
-            status: 200,
-            total: data.length,
-            url: "/characters",
-          },
-          data: data,
-        });
-    }else{
-        res.json({
-            meta: {
-              status: 204,
-              msg:"No content",
-              url: "/characters"
-            }
-          });
+    res.json({
+      meta: {
+        status: 200,
+        total: data.length,
+        url: "/movies",
+      },
+      data: data,
+    });
+}else{
+    res.json({
+        meta: {
+          status: 204,
+          msg:"No content",
+          url: "/movies"
+        }
+      });
+}
+  })
+
+  .catch((error) => console.log(error));
     }
-      })
-    
-      .catch((error) => console.log(error));
-    }    
-
-        Movies.findAll({
-            include:[{all:true}]
-        })
-        .then((movie) => {
-            
-        if(movie.length > 0){
-       
-        const data = movie.map((e) => {
-          return {
-            id: e.id,
-            imagen: e.imagen,
-            titulo: e.titulo,
-            tiempo_creado:e.createdAt
-          };
-        });
-
-        res.json({
-          meta: {
-            status: 200,
-            total: data.length,
-            url: "/movies",
-          },
-          data: data,
-        });
-    }else{
-        res.json({
-            meta: {
-              status: 204,
-              msg:"No content",
-              url: "/movies"
-            }
-          });
-    }
-      })
-    
-      .catch((error) => console.log(error));
+        
       },
     createMovies:(req, res, next)=> {
 
@@ -173,8 +165,9 @@ const controlador = {
     }
     },
     updateMovies:(req,res,next)=>{
+
     const { id } = req.params;
-    const { imagen, titulo, calificacion} = req.body;
+    const { imagen, titulo, calificacion,generoId} = req.body;
     
     const errors = validationResult(req)
       if(req.fileValidationError){
@@ -190,17 +183,15 @@ const controlador = {
         res.send({errors:errors.array()})
     }else{  
     
-      Actors.update(
+      Movies.update(
         {
-          imagen,
-          titulo,
-          calificacion
+          imagen,titulo,calificacion,generoId
         },
         {
           where: { id: +id },
         }
       ).then((edited) => {
-        let respuesta;
+        
         if (edited[0] === 1) {
           respuesta = {
             meta: {
@@ -213,12 +204,11 @@ const controlador = {
         } else {
           respuesta = {
             meta: {
-              status: 304,
-              total: edited.length,
-              url: "/movies/:id",
+              status: 400,
+              msg:"bad request"
             },
           };
-          res.status(304).json(respuesta);
+          res.status(400).json(respuesta);
         }
       })
       .catch(error=>console.log(error))
@@ -231,23 +221,22 @@ const controlador = {
       where: { id: id },
     })
     .then(response=>{
-        let respuesta;
         if(response !== 0){
-            respuesta = {
-                meta: {
-                  status: 204,
-                  url: "/movies/:id",
-                },
-              };
-              res.status(204).json(respuesta)
+          res.status(200).json({
+            meta: {
+              status: 200,
+              msg:"Delete movies ok",
+              url: "/characters",
+            },
+          });
         }else{
-            respuesta = {
-                meta: {
-                  status: 400,
-                  url: "/movies/:id",
-                },
-              };
-              res.status(400).json(respuesta)
+          res.status(400).json({
+            meta: {
+              status: 400,
+              msg:"bad request",
+              url: "/movies",
+            },
+          });
         }
         
     })

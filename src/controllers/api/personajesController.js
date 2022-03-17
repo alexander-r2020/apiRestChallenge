@@ -139,6 +139,7 @@ const controlador = {
     const { id } = req.params;
     const { imagen, nombre, edad, peso, historia } = req.body;
 
+    const errors = validationResult(req)
     if(req.fileValidationError){
 
       let img = {
@@ -160,25 +161,24 @@ const controlador = {
           where: { id: +id },
         }
       ).then((edited) => {
-        let respuesta;
+        
         if (edited[0] === 1) {
-          respuesta = {
+          res.status(202).json({
             meta: {
               status: 202,
               total: edited.length,
               url: "/characters/:id",
             },
-          };
-          res.status(202).json(respuesta);
+          });
         } else {
-          respuesta = {
+          
+          res.status(400).json({
             meta: {
-              status: 304,
-              total: edited.length,
-              url: "/characters/:id",
+              status: 400,
+              msg: "not modified",
             },
-          };
-          res.status(304).json(respuesta);
+          });
+        
         }
       })
       .catch(error=>console.log(error))
@@ -191,23 +191,20 @@ const controlador = {
       where: { id: id },
     })
     .then(response=>{
-        let respuesta;
         if(response !== 0){
-            respuesta = {
-                meta: {
-                  status: 204,
-                  url: "/characters/:id",
-                },
-              };
-              res.status(204).json(respuesta)
+          res.status(200).json({
+            meta: {
+              status: 200,
+              msg:"character eliminated",
+            },
+          });
         }else{
-            respuesta = {
-                meta: {
-                  status: 400,
-                  url: "/characters/:id",
-                },
-              };
-              res.status(400).json(respuesta)
+          res.status(400).json({
+            meta: {
+              status: 400,
+              msg:"bad request",
+            },
+          });
         }
         
     })

@@ -10,13 +10,13 @@ router.get('/',moviesAll);
 /* CREATE MOVIES. */
 router.post('/',imgUpload.single('imagen'),validatorMovies ,createMovies);
 
-/* EDIT CHARACTER*/
+/* EDIT MOVIES*/
 router.put('/:id', imgUpload.single('imagen'),validatorMovies,updateMovies);
 
-/* DELETE CHARACTER*/
+/* DELETE MOVIES*/
 router.delete('/:id', deleteMovies);
 
-/*DETAIL CHARACTER */
+/*DETAIL MOVIES */
 router.get('/detail/:id',detailMovies)
 
 
