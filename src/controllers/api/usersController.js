@@ -36,7 +36,24 @@ const controlador = {
   },
   register: (req, res, next) => {
     const { email, password } = req.body;
-    //subgrid
+    
+    Users.findOne({
+      where:{
+        email:email
+      }
+    })
+
+    .then(user=>{
+      //null no existe ese usuario
+      if(user !== null){
+        res.status(400).json({
+                meta: {
+                  status: 400,
+                  msg:"El usuario ya se encuentra registrado"
+                },
+              });
+      }else{
+        //sendgrid
     const msg={
       to: email,
       from: 'lopezcorreo2022@gmail.com',
@@ -51,6 +68,7 @@ const controlador = {
     }
 
     const passwordHash = encrypt(password);
+
     Users.create({
       email: email,
       password: passwordHash,
@@ -72,6 +90,13 @@ const controlador = {
         });
       })
       .catch((error) => console.log(error));
+
+      }
+    })
+    .catch(error=>console.log(error))
+
+
+    
   },
 };
 
