@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan')
 const path = require('path')
+const cors = require('cors')
 const PORT = process.env.PORT || 3001
 
 const userRouter = require('./routes/api/userRouter')
@@ -9,10 +10,12 @@ const characterRouter = require('./routes/api/personajeRouter')
 const moviesRouter = require('./routes/api/movieRouter')
 
 // view engine setup
+app.use(cors())
 app.set('views', path.resolve(__dirname, './views'));
 app.set('view engine', 'ejs');
 app.use(morgan('dev'))
 app.use(express.static(path.resolve(__dirname, '../public')));
+
 
 //URL encode  - Para que nos pueda llegar la información desde el formulario al req.body
 app.use(express.urlencoded({ extended: false }));
