@@ -9,6 +9,7 @@ const controlador = {
   characterAll: (req, res) => {
     if(req.query.name){
         const {name}=req.query
+        res.json(name)
         Actors.findAll({
             where:{
                 nombre:{
@@ -17,6 +18,8 @@ const controlador = {
             }
         })
         .then(actor=>{
+          if(actor.length !==0 ){
+            res.status(302)
             res.json({
                 meta: {
                   status: 302,
@@ -25,6 +28,15 @@ const controlador = {
                 },
                 data: actor,
               })
+          }else{
+            res.json({
+              meta:{
+                status:404,
+                msg:"actor not found"
+              }
+            })
+          }
+            
         })
         .catch(error=>console.log(error))
     }else if(req.query.age){
@@ -34,15 +46,25 @@ const controlador = {
                 edad:age
             }
         })
-        .then(actor=>{
+        .then(age=>{
+          if(age.length !==0 ){
+            res.status(302)
             res.json({
                 meta: {
                   status: 302,
-                  total: actor.length,
+                  total: age.length,
                   url: `/characters?age=${age}`,
                 },
-                data: actor,
+                data: age,
               })
+            }else{
+                res.json({
+                  meta:{
+                    status:404,
+                    msg:"age not found"
+                  }
+                })
+              }
         })
         .catch(error=>console.log(error))
     }else if(req.query.movies){
@@ -56,6 +78,8 @@ const controlador = {
           include:[{association:"Personajes"}]
         })
         .then(movie=>{
+          if(movie.length !==0 ){
+            res.status(302)
             res.json({
             meta: {
               status: 302,
@@ -64,11 +88,20 @@ const controlador = {
             },
             data: movie,
           })
+        }else{
+          res.json({
+            meta:{
+              status:404,
+              msg:"movie not found"
+            }
+          })
+        }
         })
         
         .catch(error=>console.log(error))
         
     }else{
+      
         Actors.findAll()
         .then((actor) => {
         if(actor.length > 0){

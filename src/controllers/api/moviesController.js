@@ -18,6 +18,8 @@ const controlador = {
             }
         })
         .then(movie=>{
+          if(movie.length !== 0){
+            res.status(302)
             res.json({
                 meta: {
                   status: 302,
@@ -26,6 +28,15 @@ const controlador = {
                 },
                 data: movie,
               })
+          }else{
+            res.json({
+              meta:{
+                status:404,
+                msg:"movie not found"
+              }
+            })
+          }
+           
         })
         .catch(error=>console.log(error))
     }else if(req.query.genre){
@@ -35,9 +46,12 @@ const controlador = {
                 nombre:{
                   [Op.substring]: `%${genre}%`
                 }
-            }
+            },
+            include:[{all:true}]
         })
         .then(genre=>{
+          if(genre.length !== 0){
+            res.status(302)
             res.json({
                 meta: {
                   status: 302,
@@ -46,6 +60,14 @@ const controlador = {
                 },
                 data: genre,
               })
+            }else{
+              res.json({
+                meta:{
+                  status:404,
+                  msg:"genre not found"
+                }
+              })
+            }
         })
         .catch(error=>console.log(error))
     }else if(req.query.order){
@@ -56,7 +78,7 @@ const controlador = {
             res.status(200)
             res.json({
               meta: {
-                status: 302,
+                status: 200,
                 total: movie.length,
                 url: `/characters?order=${order}`,
               },
@@ -74,7 +96,7 @@ const controlador = {
         .then(movie=>{
             res.json({
             meta: {
-              status: 302,
+              status: 200,
               total: movie.length,
               url: `/characters?order=${order}`,
             },

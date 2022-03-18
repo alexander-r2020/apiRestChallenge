@@ -14,7 +14,7 @@ const controlador = {
     }).then((user) => {
       if (user == null) {
         res.status(404);
-        res.send({ error: "User not found" });
+        res.send({ error: "User not found, you need to register " });
       }
 
       compare(password, user.password)
